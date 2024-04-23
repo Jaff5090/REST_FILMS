@@ -16,6 +16,9 @@ connectDB();
 app.use(express.json());
 app.use('/api/films', filmRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.all('*', (req, res) => { 
+    res.status(404).send('<h1>404! Page not found</h1>'); 
+  }); 
 
 
 app.listen(3000, () => {
