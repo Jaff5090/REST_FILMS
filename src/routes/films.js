@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const Film = require('../models/film');
+const err = require ('../errors')
 
 // Define validation rules for film data
 const filmValidationRules = () => [
@@ -11,27 +12,28 @@ const filmValidationRules = () => [
     body('rating').optional().isInt({ min: 0, max: 5 }).withMessage('Rating must be an integer between 0 and 5')
 ];
 
+
   /**
  * @openapi
  * /api/films:
  *   get:
- *     summary: Get a list of all films
+ *     summary: Get a list of all categories
  *     responses:
  *       200:
- *         description: A list of films.
+ *         description: A list of categories.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Film'
+ *                 $ref: '#/components/schemas/Film/categories'
  */
   router.get('/', async (req, res) => {
     try {
-        const films = await Film.getAllFilms();
+        const films = await Film.getAllCategories();
         res.status(200).json(films);
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving films", error: error.message });
+        res.status(500).json({ message: "Error retrieving films : ", error: error.message });
     }
 });
 
