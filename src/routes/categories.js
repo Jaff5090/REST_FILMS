@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const Categorie = require('../models/categories');
+const categ = require('../models/categories');
 
 /**
  * @openapi
- * /api/films:
+ * /api/categories:
  *   get:
  *     summary: Get a list of all categories
  *     responses:
@@ -20,9 +19,11 @@ const Categorie = require('../models/categories');
  */
   router.get('/', async (req, res) => {
     try {
-        const categories = await Categorie.getAllCategories();
-        res.status(200).json(categories);
+        const cat = await categ.getAllCategories();
+        res.status(200).json(cat);
     } catch (error) {
         res.status(500).json({ message: "Error retrieving categories : ", error: error.message });
     }
 });
+
+module.exports = router;

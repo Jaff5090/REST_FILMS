@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const Film = require('../models/film');
-const err = require ('../errors')
 
 // Define validation rules for film data
 const filmValidationRules = () => [
@@ -17,20 +16,20 @@ const filmValidationRules = () => [
  * @openapi
  * /api/films:
  *   get:
- *     summary: Get a list of all categories
+ *     summary: Get a list of all films
  *     responses:
  *       200:
- *         description: A list of categories.
+ *         description: A list of films.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Film/categories'
+ *                 $ref: '#/components/schemas/Film/films'
  */
   router.get('/', async (req, res) => {
     try {
-        const films = await Film.getAllCategories();
+        const films = await Film.getAllFilms();
         res.status(200).json(films);
     } catch (error) {
         res.status(500).json({ message: "Error retrieving films : ", error: error.message });
