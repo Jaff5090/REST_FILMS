@@ -22,19 +22,77 @@ const filmValidationRules = () => [
  *     tags:
  *       - Films
  *     summary: Get a list of all films
+ *     description: Retrieves a paginated list of films, optionally filtered by title or description.
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Keyword to search in film title or description.
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Page number of the results to retrieve.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Number of results per page.
  *     responses:
  *       200:
- *         description: A list of films.
+ *         description: A paginated list of films with navigation links.
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Film'
+ *               type: object
+ *               properties:
+ *                 _links:
+ *                   type: object
+ *                   properties:
+ *                     self:
+ *                       type: object
+ *                       properties:
+ *                         href:
+ *                           type: string
+ *                           example: '/api/films?page=1&limit=10'
+ *                     next:
+ *                       type: object
+ *                       properties:
+ *                         href:
+ *                           type: string
+ *                           example: '/api/films?page=2&limit=10'
+ *                     prev:
+ *                       type: object
+ *                       properties:
+ *                         href:
+ *                           type: string
+ *                           example: '/api/films?page=1&limit=10'
+ *                 total:
+ *                   type: integer
+ *                   example: 50
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
+ *                 films:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Film'
  */
 router.get('/', async (req, res) => {
-    const films = await filmController.getAllFilms();
-    res.status(200).json(films);
+    try {
+        const { search, page, limit } = req.query;
+        const response = await filmController.getAllFilms({ search, page: parseInt(page), limit: parseInt(limit) });
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving films: " + error.message });
+    }
 });
 
 /**

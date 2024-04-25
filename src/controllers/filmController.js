@@ -1,7 +1,42 @@
 const Film = require('../models/film');
 
-async function getAllFilms() {
-    return await Film.find().populate('categories');
+async function getAllFilms({ search, page = 1, limit = 10 }) {
+    const query = {};
+    if (search) {
+        query.$or = [
+            { title: { $regex: new RegExp(search, 'i') } },
+            { description: { $regex: new RegExp(search, 'i') } }
+        ];
+    }
+
+    try {
+        const films = await Film.find(query)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate('categories');
+        const total = await Film.countDocuments(query);
+        return  {
+            _links: {
+                self: { href: `/api/films?page=${page}&limit=${limit}` },
+                next: { href: `/api/films?page=${page + 1}&limit=${limit}` },
+                prev: page > 1 ? { href: `/api/films?page=${page - 1}&limit=${limit}` } : undefined
+            },
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            films: films.map(film => ({
+                ...film._doc,
+                _links: {
+                    self: { href: `/api/films/${film._id}` },
+                    categories: film.categories.map(cat => ({
+                        href: `/api/categories/${cat._id}`
+                    }))
+                }
+            }))
+        };
+    } catch (error) {
+        throw new Error('Error retrieving films: ' + error.message);
+    }
 }
 
 async function getFilmById(id) {

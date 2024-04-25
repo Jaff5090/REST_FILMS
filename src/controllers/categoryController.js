@@ -19,7 +19,7 @@ async function deleteCategory(inCategoryId) {
 async function updateCategory(categoryId, updateData) {
     const category = await Categories.findById(categoryId);
     if (!category) {
-        throw new Error('Category not found');
+        throw new     Error('Category not found');
     }
 
     category.name = updateData.name || category.name;
