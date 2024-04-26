@@ -1,4 +1,6 @@
 const Film = require('../models/film');
+const fs = require('fs');
+const path = require('path');
 
 async function getAllFilms({ search, page = 1, limit = 10 }) {
     const query = {};
@@ -69,11 +71,38 @@ async function addCategoryToFilm(filmId, categoryId) {
 }
 
 
+async function uploadFilmPoster(filmId, imageBuffer) {
+    const film = await Film.findById(filmId);
+    if (!film) {
+        throw new Error('Film not found');
+    }
+
+    // Create Unique name of file
+    const filename = `${filmId}-${Date.now()}.jpg`;
+    const filepath = path.join(__dirname, '..', 'uploads', filename);
+    
+    const uploadsDir = path.join(__dirname, '..', 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+        await fs.promises.mkdir(uploadsDir, { recursive: true });
+    }
+
+    // Whrite image to system file
+    await fs.promises.writeFile(filepath, imageBuffer, 'binary');
+
+    // Update Url in database 
+    film.posterUrl = `/uploads/${filename}`;
+    await film.save();
+
+    return film;
+}
+
+
 module.exports = {
     getAllFilms,
     getFilmById,
     addFilm,
     updateFilm,
     deleteFilm,
-    addCategoryToFilm
+    addCategoryToFilm,
+    uploadFilmPoster
 };

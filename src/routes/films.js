@@ -13,6 +13,35 @@ const filmValidationRules = () => [
     body('categoryIds').isArray().withMessage('Categories must be an array'),  // Add validation rules for film data
     body('categoryIds.*').isMongoId().withMessage('Each category ID must be a valid MongoDB ObjectId') // Each category ID must be a valid MongoDB ObjectId
 ];
+// read binarydata Image
+const readBinaryData = (req, res, next) => {
+    const data = [];
+    let dataLength = 0;
+    const MAX_SIZE = 5 * 1024 * 1024; // Maximum file size (5 MB)
+
+    req.on('data', chunk => {
+        dataLength += chunk.length;
+        if (dataLength > MAX_SIZE) {
+            req.unpipe();
+            return res.status(413).json({ message: "File too large" });
+        }
+        data.push(chunk);
+    });
+
+    req.on('end', () => {
+        if (dataLength === 0) {
+            return res.status(400).json({ message: "No file data received" });
+        }
+        req.body = Buffer.concat(data);
+        next();
+    });
+
+    req.on('error', error => {
+        console.error(`Error collecting request data: ${error.message}`);
+        res.status(500).json({ message: "Error processing upload" });
+    });
+};
+
 
 
 /**
@@ -300,6 +329,63 @@ router.post('/add-category', async (req, res) => {
 });
 
 
+/**
+ * @openapi
+ * /api/films/{id}/upload:
+ *   post:
+ *     tags:
+ *       - Films
+ *     summary: Upload a film poster
+ *     description: This endpoint allows for uploading a poster image for a specific film identified by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The MongoDB ObjectId of the film to which the poster will be uploaded.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               poster:
+ *                 type: string
+ *                 format: binary
+ *                 description: The film poster image to upload.
+ *     responses:
+ *       200:
+ *         description: Poster uploaded successfully. Returns the updated film object.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'Poster uploaded successfully'
+ *                 film:
+ *                   $ref: '#/components/schemas/Film'
+ *       400:
+ *         description: Bad request, possibly due to invalid format or missing file.
+ *       500:
+ *         description: Internal server error if the upload or database update fails.
+ */
+
+router.post('/:id/upload', readBinaryData, async (req, res) => {
+    try {
+        const filmId = req.params.id;
+        const imageBuffer = req.body;
+
+        // Appeler la fonction du contrôleur pour uploader l'image
+        const film = await filmController.uploadFilmPoster(filmId, imageBuffer);
+        res.status(200).json({ message: "Poster uploaded successfully", film });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 /**
  * @openapi
