@@ -3,6 +3,11 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const filmController = require('../controllers/filmController');
 const Film = require('../models/film');
+const authMiddleware = require('../middleware/authMiddleware');
+const authorize = require('../middleware/authorize');
+
+
+
 
 
 const filmValidationRules = () => [
@@ -180,7 +185,7 @@ router.get('/:id', async (req, res) => {
  *         description: Validation error
  */
 
-  router.post('/', filmValidationRules(), async (req, res) => {
+  router.post('/', [authMiddleware, authorize(['ROLE_ADMIN']), filmValidationRules()], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
@@ -223,7 +228,7 @@ router.get('/:id', async (req, res) => {
  *         description: Film not found
  */
 
-router.put('/:id', filmValidationRules(), async (req, res) => {
+router.put('/:id', [authMiddleware, authorize(['ROLE_ADMIN']),filmValidationRules()], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
@@ -262,7 +267,7 @@ router.put('/:id', filmValidationRules(), async (req, res) => {
  *         description: Film not found
  */
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',[authMiddleware, authorize(['ROLE_ADMIN'])], async (req, res) => {
     try {
         const film = await filmController.deleteFilm(req.params.id);
         if (film) {
@@ -318,7 +323,7 @@ router.delete('/:id', async (req, res) => {
  *         description: Internal server error if the operation cannot be completed.
  */
 
-router.post('/add-category', async (req, res) => {
+router.post('/add-category',[authMiddleware, authorize(['ROLE_ADMIN'])], async (req, res) => {
     const { filmId, categoryId } = req.body;
     try {
         const updatedFilm = await filmController.addCategoryToFilm(filmId, categoryId);
@@ -374,7 +379,7 @@ router.post('/add-category', async (req, res) => {
  *         description: Internal server error if the upload or database update fails.
  */
 
-router.post('/:id/upload', readBinaryData, async (req, res) => {
+router.post('/:id/upload',[authMiddleware, authorize(['ROLE_ADMIN'])] ,readBinaryData, async (req, res) => {
     try {
         const filmId = req.params.id;
         const imageBuffer = req.body;
