@@ -15,9 +15,9 @@ connectDB();
 
 
 app.use(express.json());
-app.use('/api/films', filmRoutes); // Protéger les routes de films
-app.use('/api/categories', authMiddleware, categoriesRoutes); // Protéger les routes de catégories
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/films', filmRoutes); 
+app.use('/api/categories', authMiddleware, categoriesRoutes); 
+app.use('/api-docs/films', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.all('*', (req, res) => { 
     res.status(404).send('<h1>Error 404 : Page not found !</h1>'); 
@@ -25,7 +25,7 @@ app.all('*', (req, res) => {
 
 app.listen(3000, () => {
     console.log('Server started on http://localhost:3000/api/films');
-    console.log('Access the MovieDevoir API documentation at http://localhost:3000/api-docs');
+    console.log('Access the MovieDevoir API documentation at http://localhost:3000/api-docs/films');
 });
 
 module.exports = app;
