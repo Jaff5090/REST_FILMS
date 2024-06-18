@@ -1,5 +1,12 @@
 # MongoDB and Express.js REST FILMS
 
+
+## Project Members
+- **ZIANE Akli**
+- **BEN HSSAN Jaffar**
+- **NANS Maurel**
+- **SEGHAIER Mohamed-Ali**
+
 This repository contains the sample application for the [MongoDB and Express.js REST API tutorial]
 
 
