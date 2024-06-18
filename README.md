@@ -2,7 +2,7 @@
 
 
 ## Project Members
-- **BEN HSSAN Jaffar**
+- **BEN HSSAN Jaafar**
 - **SEGHAIER Mohamed-Ali**
 
 This repository contains the sample application for the [MongoDB and Express.js REST API tutorial]
